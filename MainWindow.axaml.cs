@@ -19,6 +19,8 @@ namespace NovaBlackline;
 
 record LaunchItem(string Name, string Icon, string Description, string Command, Color AccentColor, string? WallpaperPath = null);
 
+enum Layer { Tiles, TopBar }
+
 public partial class MainWindow : Window
 {
     static readonly Color Yellow = Color.FromRgb(255, 215, 0);
@@ -34,7 +36,9 @@ public partial class MainWindow : Window
     static readonly double[] TileOffsets = [0,   265, 430, 560];
     static readonly double[] TileOpacity = [1.0, 0.6, 0.35, 0.18];
 
-    int _current;
+    int   _current;
+    Layer _layer       = Layer.Tiles;
+    int   _topBarIndex = 0;
     Timer? _clockTimer;
     readonly Dictionary<int, Bitmap?> _wallpapers = new();
 
@@ -220,9 +224,9 @@ public partial class MainWindow : Window
         KeyDown += OnKeyDown;
         TilesCanvas.SizeChanged += (_, _) => DrawTiles();
 
-        StoreButton.PointerPressed    += (_, _) => Launch(new LaunchItem("Store", "", "", "xdg-open https://store.steampowered.com", default));
-        SettingsButton.PointerPressed += (_, _) => { };
-        MenuButton.PointerPressed     += (_, _) => { };
+        StoreButton.PointerPressed    += (_, _) => ActivateTopBarItem(0);
+        SettingsButton.PointerPressed += (_, _) => ActivateTopBarItem(1);
+        MenuButton.PointerPressed     += (_, _) => ActivateTopBarItem(2);
 
         _clockTimer = new Timer(
             _ => Dispatcher.UIThread.Post(UpdateClock),
@@ -364,19 +368,74 @@ public partial class MainWindow : Window
     {
         switch (e.Key)
         {
-            case Key.Left when _current > 0:
+            case Key.Up when _layer == Layer.Tiles:
+                _layer = Layer.TopBar;
+                _topBarIndex = 0;
+                UpdateTopBar();
+                break;
+
+            case Key.Down when _layer == Layer.TopBar:
+                _layer = Layer.Tiles;
+                UpdateTopBar();
+                break;
+
+            case Key.Left when _layer == Layer.TopBar && _topBarIndex > 0:
+                _topBarIndex--;
+                UpdateTopBar();
+                break;
+
+            case Key.Right when _layer == Layer.TopBar && _topBarIndex < 2:
+                _topBarIndex++;
+                UpdateTopBar();
+                break;
+
+            case Key.Left when _layer == Layer.Tiles && _current > 0:
                 _current--;
                 UpdateAll();
                 break;
-            case Key.Right when _current < Items.Length - 1:
+
+            case Key.Right when _layer == Layer.Tiles && _current < Items.Length - 1:
                 _current++;
                 UpdateAll();
                 break;
-            case Key.Enter:
+
+            case Key.Enter when _layer == Layer.TopBar:
+                ActivateTopBarItem(_topBarIndex);
+                break;
+
+            case Key.Enter when _layer == Layer.Tiles:
                 Launch(Items[_current]);
                 break;
+
             case Key.Escape:
                 Close();
+                break;
+        }
+    }
+
+    void UpdateTopBar()
+    {
+        Border[] buttons = [StoreButton, SettingsButton, MenuButton];
+        for (int i = 0; i < buttons.Length; i++)
+        {
+            bool focused = _layer == Layer.TopBar && i == _topBarIndex;
+            buttons[i].Background  = new SolidColorBrush(Color.FromArgb(focused ? (byte)80  : (byte)26,  255, 215, 0));
+            buttons[i].BorderBrush = new SolidColorBrush(Color.FromArgb(focused ? (byte)220 : (byte)68,  255, 215, 0));
+        }
+    }
+
+    void ActivateTopBarItem(int index)
+    {
+        switch (index)
+        {
+            case 0:
+                Launch(new LaunchItem("Store", "", "", "xdg-open https://store.steampowered.com", default));
+                break;
+            case 1:
+                // settings — coming soon
+                break;
+            case 2:
+                // menu — coming soon
                 break;
         }
     }
