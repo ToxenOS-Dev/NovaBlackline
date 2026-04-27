@@ -1,0 +1,166 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="NovaBlackline.MainWindow"
+        WindowState="FullScreen"
+        Background="Black">
+
+    <Grid>
+
+        <!-- Layer 1: App wallpaper -->
+        <Image x:Name="WallpaperImage"
+               Stretch="UniformToFill"
+               HorizontalAlignment="Stretch"
+               VerticalAlignment="Stretch">
+            <Image.Effect>
+                <BlurEffect Radius="18"/>
+            </Image.Effect>
+        </Image>
+
+        <!-- Layer 2: Vignette / color overlay -->
+        <Border x:Name="DimOverlay"/>
+
+        <!-- Layer 3: Bottom dark scrim (always on, over everything below) -->
+        <Border VerticalAlignment="Bottom" Height="320">
+            <Border.Background>
+                <LinearGradientBrush StartPoint="0%,0%" EndPoint="0%,100%">
+                    <GradientStop Color="#00000000" Offset="0"/>
+                    <GradientStop Color="#BB000000" Offset="0.55"/>
+                    <GradientStop Color="#FF000000" Offset="1"/>
+                </LinearGradientBrush>
+            </Border.Background>
+        </Border>
+
+        <!-- Layer 5: UI -->
+        <Grid RowDefinitions="80,*,160">
+
+            <!-- Top bar -->
+            <Grid Grid.Row="0">
+
+                <!-- Bar background: opaque dark on left, fades right -->
+                <Border>
+                    <Border.Background>
+                        <LinearGradientBrush StartPoint="0%,50%" EndPoint="100%,50%">
+                            <GradientStop Color="#CC000000" Offset="0"/>
+                            <GradientStop Color="#55000000" Offset="0.5"/>
+                            <GradientStop Color="#00000000" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Border.Background>
+                </Border>
+
+                <!-- Yellow accent line along the bottom of the bar -->
+                <Rectangle Height="1" VerticalAlignment="Bottom" Fill="#55FFD700"/>
+
+                <!-- Bar content -->
+                <Grid Margin="50,0">
+
+                    <!-- Left: yellow pip + title -->
+                    <StackPanel Orientation="Horizontal"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Center"
+                                Spacing="14">
+                        <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                            <Rectangle Width="4" Height="18" Fill="#FFD700" RadiusX="2" RadiusY="2" VerticalAlignment="Center"/>
+                            <Rectangle Width="4" Height="22" Fill="#FFD700" RadiusX="2" RadiusY="2" VerticalAlignment="Center"/>
+                            <Rectangle Width="4" Height="26" Fill="#FFD700" RadiusX="2" RadiusY="2" VerticalAlignment="Center"/>
+                        </StackPanel>
+                        <TextBlock Text="NOVA BLACKLINE"
+                                   FontSize="17"
+                                   FontWeight="Bold"
+                                   Foreground="#FFD700"
+                                   VerticalAlignment="Center"/>
+                    </StackPanel>
+
+                    <!-- Center: clock -->
+                    <TextBlock x:Name="ClockText"
+                               FontSize="22"
+                               FontWeight="Bold"
+                               Foreground="White"
+                               Opacity="0.9"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"/>
+
+                    <!-- Right: store + settings + hamburger -->
+                    <StackPanel Orientation="Horizontal"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Center"
+                                Spacing="12">
+
+                        <!-- Store button -->
+                        <Border x:Name="StoreButton"
+                                Background="#1AFFD700"
+                                BorderBrush="#44FFD700"
+                                BorderThickness="1"
+                                CornerRadius="6"
+                                Padding="14,6"
+                                Cursor="Hand">
+                            <TextBlock Text="STORE"
+                                       FontSize="12"
+                                       FontWeight="Bold"
+                                       Foreground="#FFD700"
+                                       VerticalAlignment="Center"/>
+                        </Border>
+
+                        <!-- Settings button -->
+                        <Border x:Name="SettingsButton"
+                                Background="#1AFFD700"
+                                BorderBrush="#44FFD700"
+                                BorderThickness="1"
+                                CornerRadius="6"
+                                Padding="12,6"
+                                Cursor="Hand">
+                            <TextBlock Text="⚙"
+                                       FontSize="14"
+                                       Foreground="#FFD700"
+                                       VerticalAlignment="Center"/>
+                        </Border>
+
+                        <!-- Hamburger menu -->
+                        <Border x:Name="MenuButton"
+                                Background="#1AFFD700"
+                                BorderBrush="#44FFD700"
+                                BorderThickness="1"
+                                CornerRadius="6"
+                                Padding="11,9"
+                                Cursor="Hand">
+                            <StackPanel Spacing="4" VerticalAlignment="Center">
+                                <Rectangle Width="18" Height="2" Fill="#FFD700"/>
+                                <Rectangle Width="18" Height="2" Fill="#FFD700"/>
+                                <Rectangle Width="18" Height="2" Fill="#FFD700"/>
+                            </StackPanel>
+                        </Border>
+
+                    </StackPanel>
+                </Grid>
+            </Grid>
+
+            <!-- Tile canvas -->
+            <Canvas x:Name="TilesCanvas" Grid.Row="1" ClipToBounds="True"/>
+
+            <!-- Bottom info -->
+            <StackPanel Grid.Row="2"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Spacing="10">
+                <TextBlock x:Name="ItemNameText"
+                           FontSize="34"
+                           FontWeight="Bold"
+                           Foreground="#FFD700"
+                           HorizontalAlignment="Center"
+                           TextAlignment="Center"/>
+                <TextBlock x:Name="ItemDescText"
+                           FontSize="14"
+                           Foreground="White"
+                           Opacity="0.45"
+                           HorizontalAlignment="Center"
+                           TextAlignment="Center"/>
+                <TextBlock Text="←  →   navigate        ENTER   launch        ESC   quit"
+                           FontSize="11"
+                           Foreground="White"
+                           Opacity="0.22"
+                           HorizontalAlignment="Center"
+                           Margin="0,18,0,0"/>
+            </StackPanel>
+
+        </Grid>
+    </Grid>
+</Window>
