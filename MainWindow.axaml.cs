@@ -40,6 +40,7 @@ public partial class MainWindow : Window
     Layer _layer       = Layer.Tiles;
     int   _topBarIndex = 0;
     Timer? _clockTimer;
+    readonly HashSet<string> _monitoredControllers = new();
     readonly Dictionary<int, Bitmap?> _wallpapers = new();
 
     // ── Item discovery ────────────────────────────────────────────────────────
@@ -235,6 +236,7 @@ public partial class MainWindow : Window
         UpdateClock();
         UpdateInfo();
         UpdateBackground();
+        StartControllerMonitor();
     }
 
     void UpdateClock() =>
@@ -438,6 +440,175 @@ public partial class MainWindow : Window
                 // menu — coming soon
                 break;
         }
+    }
+
+    // ── Controller support (evdev — same API Steam uses) ─────────────────────
+
+    // input_event on 64-bit Linux: 8-byte timeval sec + 8-byte usec + u16 type + u16 code + s32 value = 24 bytes
+    const int EvStructSize = 24;
+    const int EvTypeOffset  = 16;
+    const int EvCodeOffset  = 18;
+    const int EvValueOffset = 20;
+
+    const ushort EV_KEY = 1, EV_ABS = 3;
+
+    // Standard Linux gamepad button codes (same across Nintendo/Xbox/PS after driver remapping)
+    const ushort BTN_SOUTH  = 0x130; // A / Cross / Nintendo-B
+    const ushort BTN_EAST   = 0x131; // B / Circle / Nintendo-A
+    const ushort BTN_START  = 0x13B; // Start / Options / +
+    const ushort BTN_SELECT = 0x13A; // Select / Share / -
+
+    // Axis codes
+    const ushort ABS_X     = 0;  // left stick X   — analog, ±32767
+    const ushort ABS_Y     = 1;  // left stick Y   — analog, ±32767
+    const ushort ABS_HAT0X = 16; // D-pad X        — HAT, values −1 / 0 / 1
+    const ushort ABS_HAT0Y = 17; // D-pad Y        — HAT, values −1 / 0 / 1
+
+    void StartControllerMonitor()
+    {
+        new Thread(ControllerMonitorLoop) { IsBackground = true, Name = "ControllerMonitor" }.Start();
+    }
+
+    void ControllerMonitorLoop()
+    {
+        while (true)
+        {
+            if (IODirectory.Exists("/dev/input"))
+            {
+                foreach (string dev in IODirectory.GetFiles("/dev/input", "event*"))
+                {
+                    if (IsGamepadDevice(dev) && _monitoredControllers.Add(dev))
+                    {
+                        string d = dev;
+                        new Thread(() => ReadEvdevController(d)) { IsBackground = true }.Start();
+                    }
+                }
+            }
+            Thread.Sleep(2000);
+        }
+    }
+
+    static bool IsGamepadDevice(string eventDev)
+    {
+        try
+        {
+            string name = IOFile.ReadAllText(
+                $"/sys/class/input/{IOPath.GetFileName(eventDev)}/device/name").ToLower().Trim();
+            return name.Contains("controller") || name.Contains("gamepad")  ||
+                   name.Contains("joystick")   || name.Contains("nintendo") ||
+                   name.Contains("xbox")       || name.Contains("dualshock")||
+                   name.Contains("dualsense")  || name.Contains("pro con");
+        }
+        catch { return false; }
+    }
+
+    void ReadEvdevController(string device)
+    {
+        try
+        {
+            using var stream = new System.IO.FileStream(device,
+                System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.ReadWrite);
+
+            var buf           = new byte[EvStructSize];
+            var axisLastFired = new Dictionary<ushort, DateTime>();
+            var axisActive    = new Dictionary<ushort, bool>();
+
+            while (stream.Read(buf, 0, EvStructSize) == EvStructSize)
+            {
+                ushort type  = BitConverter.ToUInt16(buf, EvTypeOffset);
+                ushort code  = BitConverter.ToUInt16(buf, EvCodeOffset);
+                int    value = BitConverter.ToInt32 (buf, EvValueOffset);
+
+                if (type == EV_KEY && value == 1) // button down
+                {
+                    ushort btn = code;
+                    Dispatcher.UIThread.Post(() =>
+                    {
+                        switch (btn)
+                        {
+                            case BTN_SOUTH:
+                            case BTN_START:  OnControllerEnter(); break;
+                            case BTN_EAST:
+                            case BTN_SELECT: OnControllerBack();  break;
+                        }
+                    });
+                }
+                else if (type == EV_ABS)
+                {
+                    // HAT axes (D-pad) use −1/0/1; analog sticks use ±32767
+                    bool isHat  = code == ABS_HAT0X || code == ABS_HAT0Y;
+                    bool active = isHat ? value != 0 : Math.Abs(value) > 16000;
+
+                    if (!active)
+                    {
+                        axisActive[code] = false;
+                        axisLastFired.Remove(code);
+                        continue;
+                    }
+
+                    var  now     = DateTime.UtcNow;
+                    bool first   = !axisActive.GetValueOrDefault(code);
+                    bool elapsed = !axisLastFired.TryGetValue(code, out var last)
+                                   || (now - last).TotalMilliseconds > 280;
+
+                    if (!first && !elapsed) continue;
+
+                    axisActive[code]    = true;
+                    axisLastFired[code] = now;
+
+                    int    dir  = value > 0 ? 1 : -1;
+                    ushort axis = code;
+                    Dispatcher.UIThread.Post(() =>
+                    {
+                        switch (axis)
+                        {
+                            case ABS_X: case ABS_HAT0X:
+                                if (dir < 0) OnControllerLeft(); else OnControllerRight(); break;
+                            case ABS_Y: case ABS_HAT0Y:
+                                if (dir < 0) OnControllerUp();   else OnControllerDown();  break;
+                        }
+                    });
+                }
+            }
+        }
+        catch
+        {
+            _monitoredControllers.Remove(device);
+        }
+    }
+
+    void OnControllerLeft()
+    {
+        if (_layer == Layer.TopBar && _topBarIndex > 0)              { _topBarIndex--; UpdateTopBar(); }
+        else if (_layer == Layer.Tiles && _current > 0)              { _current--; UpdateAll(); }
+    }
+
+    void OnControllerRight()
+    {
+        if (_layer == Layer.TopBar && _topBarIndex < 2)              { _topBarIndex++; UpdateTopBar(); }
+        else if (_layer == Layer.Tiles && _current < Items.Length-1) { _current++; UpdateAll(); }
+    }
+
+    void OnControllerUp()
+    {
+        if (_layer == Layer.Tiles) { _layer = Layer.TopBar; _topBarIndex = 0; UpdateTopBar(); }
+    }
+
+    void OnControllerDown()
+    {
+        if (_layer == Layer.TopBar) { _layer = Layer.Tiles; UpdateTopBar(); }
+    }
+
+    void OnControllerEnter()
+    {
+        if (_layer == Layer.TopBar) ActivateTopBarItem(_topBarIndex);
+        else                        Launch(Items[_current]);
+    }
+
+    void OnControllerBack()
+    {
+        if (_layer == Layer.TopBar) { _layer = Layer.Tiles; UpdateTopBar(); }
+        else                        Close();
     }
 
     static void Launch(LaunchItem item)
