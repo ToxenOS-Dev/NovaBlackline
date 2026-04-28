@@ -4,6 +4,9 @@ using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Input;
 using Avalonia.Layout;
+using Avalonia.Animation;
+using Avalonia.Animation.Easings;
+using Avalonia.Styling;
 using Avalonia.Threading;
 using IOPath      = System.IO.Path;
 using IOFile      = System.IO.File;
@@ -14,6 +17,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace NovaBlackline;
 
@@ -129,7 +133,9 @@ public partial class MainWindow : Window
     bool _shopInContent   = false;
     int  _shopGameIndex   = 0;
 
-    Timer?  _clockTimer;
+    Timer?                   _clockTimer;
+    CancellationTokenSource? _animCts;
+    bool                     _animating = true;
     readonly HashSet<string>    _monitoredControllers = new();
     readonly Dictionary<int, Bitmap?> _wallpapers     = new();
 
@@ -294,6 +300,7 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        Cursor = new Cursor(StandardCursorType.None);
         InitSettings();
 
         KeyDown += OnKeyDown;
@@ -311,9 +318,65 @@ public partial class MainWindow : Window
         UpdateInfo();
         UpdateBackground();
         StartControllerMonitor();
+        PlayStartAnimation();
     }
 
     void UpdateClock() => ClockText.Text = DateTime.Now.ToString("HH:mm");
+
+    // ── Start animation ───────────────────────────────────────────────────────
+    // Uses Transitions (not Animation/KeyFrame) so properties stay at their
+    // target value after each step — no revert flicker.
+
+    async void PlayStartAnimation()
+    {
+        _animCts = new CancellationTokenSource();
+        var ct   = _animCts.Token;
+
+        StartLogoGroup.Transitions = new Transitions
+        {
+            new DoubleTransition { Property = Visual.OpacityProperty, Duration = TimeSpan.FromMilliseconds(900),  Easing = new CubicEaseOut() }
+        };
+        StartTagline.Transitions = new Transitions
+        {
+            new DoubleTransition { Property = Visual.OpacityProperty, Duration = TimeSpan.FromMilliseconds(700),  Easing = new CubicEaseOut() }
+        };
+        StartOverlay.Transitions = new Transitions
+        {
+            new DoubleTransition { Property = Visual.OpacityProperty, Duration = TimeSpan.FromMilliseconds(1000), Easing = new CubicEaseIn()  }
+        };
+
+        try
+        {
+            StartLogoGroup.Opacity = 1.0;
+            await Task.Delay(900 + 900, ct);   // fade-in + hold
+
+            StartTagline.Opacity = 0.45;
+            await Task.Delay(700 + 1600, ct);  // fade-in + hold
+
+            StartOverlay.Opacity = 0.0;
+            await Task.Delay(1000, ct);        // fade-out
+        }
+        catch (OperationCanceledException) { }
+
+        FinishAnimation();
+    }
+
+    void SkipAnimation()
+    {
+        if (!_animating) return;
+        _animCts?.Cancel();
+    }
+
+    void FinishAnimation()
+    {
+        StartLogoGroup.Transitions = null;
+        StartTagline.Transitions   = null;
+        StartOverlay.Transitions   = null;
+        _animating = false;
+        _animCts?.Dispose();
+        _animCts = null;
+        StartOverlay.IsVisible = false;
+    }
 
     // ── Settings ─────────────────────────────────────────────────────────────
 
@@ -572,6 +635,8 @@ public partial class MainWindow : Window
 
     private void OnKeyDown(object? sender, KeyEventArgs e)
     {
+        if (_animating) { SkipAnimation(); return; }
+
         if (_layer == Layer.Shop)
         {
             if (_shopInContent)
@@ -1015,6 +1080,7 @@ public partial class MainWindow : Window
 
     void OnControllerEnter()
     {
+        if (_animating) { SkipAnimation(); return; }
         if (_layer == Layer.Shop)
         {
             if (_shopInContent) { var (_, appId, _) = FeaturedGames[_shopGameIndex]; Launch(new LaunchItem("", "", "", $"xdg-open steam://store/{appId}", default)); }
@@ -1029,6 +1095,7 @@ public partial class MainWindow : Window
 
     void OnControllerBack()
     {
+        if (_animating) { SkipAnimation(); return; }
         if (_layer == Layer.Shop)     { if (_shopInContent) { _shopInContent = false; DrawShopTabs(); DrawShopContent(); UpdateShopFooter(); } else CloseShop(); return; }
         if (_layer == Layer.Settings) { CloseSettings(); return; }
         if (_layer == Layer.TopBar)   { _layer = Layer.Tiles; UpdateTopBar(); return; }

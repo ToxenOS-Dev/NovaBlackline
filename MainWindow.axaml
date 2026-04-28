@@ -233,5 +233,40 @@
             </Border>
         </Grid>
 
+        <!-- Start animation overlay — topmost, always on top during startup -->
+        <Grid x:Name="StartOverlay">
+            <Border Background="Black"/>
+            <StackPanel HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Spacing="16">
+
+                <!-- Logo row -->
+                <StackPanel x:Name="StartLogoGroup"
+                            Orientation="Horizontal"
+                            HorizontalAlignment="Center"
+                            Spacing="18"
+                            Opacity="0">
+                    <StackPanel Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
+                        <Rectangle Width="5" Height="20" Fill="#FFD700" RadiusX="2" RadiusY="2" VerticalAlignment="Center"/>
+                        <Rectangle Width="5" Height="26" Fill="#FFD700" RadiusX="2" RadiusY="2" VerticalAlignment="Center"/>
+                        <Rectangle Width="5" Height="32" Fill="#FFD700" RadiusX="2" RadiusY="2" VerticalAlignment="Center"/>
+                    </StackPanel>
+                    <TextBlock Text="NOVA BLACKLINE"
+                               FontSize="52"
+                               FontWeight="Bold"
+                               Foreground="#FFD700"
+                               VerticalAlignment="Center"/>
+                </StackPanel>
+
+                <!-- Tagline -->
+                <TextBlock x:Name="StartTagline"
+                           Text="YOUR GAMES. YOUR WAY."
+                           FontSize="13"
+                           Foreground="White"
+                           Opacity="0"
+                           HorizontalAlignment="Center"/>
+            </StackPanel>
+        </Grid>
+
     </Grid>
 </Window>
