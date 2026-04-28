@@ -88,9 +88,26 @@ public partial class MainWindow
     {
         var items = new List<LaunchItem>();
         items.AddRange(DiscoverSteamGames());
-        items.Add(new("Terminal", ">", "Command line",    ResolveTerminal(),                                 Color.FromRgb(30,  30,  30)));
-        items.Add(new("Spotify",  "S", "Music streaming", ResolveApp("spotify",  "com.spotify.Client"),     Color.FromRgb(29,  185, 84)));
-        items.Add(new("Discord",  "@", "Voice and chat",  ResolveApp("discord",  "com.discordapp.Discord"), Color.FromRgb(88,  101, 242)));
+        items.Add(new("Terminal",    ">",  "Command line",          ResolveTerminal(),                                   Color.FromRgb( 30,  30,  30)));
+        items.Add(new("Spotify",     "S",  "Music streaming",       ResolveApp("spotify",     "com.spotify.Client"),     Color.FromRgb( 29, 185,  84)));
+        items.Add(new("Discord",     "@",  "Voice and chat",        ResolveApp("discord",     "com.discordapp.Discord"), Color.FromRgb( 88, 101, 242)));
+        items.Add(new("Firefox",     "FF", "Web browser",           ResolveApp("firefox",     "org.mozilla.firefox"),    Color.FromRgb(255,  80,   0)));
+        items.Add(new("Chrome",      "G",  "Web browser",           ResolveApp("google-chrome","com.google.Chrome"),     Color.FromRgb( 66, 133, 244)));
+        items.Add(new("VSCode",      "</>","Code editor",           ResolveApp("code",        "com.visualstudio.code"),  Color.FromRgb( 0,  122, 204)));
+        items.Add(new("Files",       "F",  "File manager",          ResolveApp("nautilus",    "org.gnome.Nautilus"),     Color.FromRgb( 53, 132, 228)));
+        items.Add(new("Steam",       "ST", "Game platform",         ResolveApp("steam",       "com.valvesoftware.Steam"),Color.FromRgb( 23,  46,  73)));
+        items.Add(new("OBS",         "●",  "Streaming & recording", ResolveApp("obs",         "com.obsproject.Studio"),  Color.FromRgb( 50,  50,  50)));
+        items.Add(new("VLC",         "▶",  "Media player",          ResolveApp("vlc",         "org.videolan.VLC"),       Color.FromRgb(255, 165,   0)));
+        items.Add(new("GIMP",        "G",  "Image editor",          ResolveApp("gimp",        "org.gimp.GIMP"),          Color.FromRgb( 93, 141,  52)));
+        items.Add(new("Blender",     "B",  "3D creation suite",     ResolveApp("blender",     "org.blender.Blender"),    Color.FromRgb(234, 126,   0)));
+        items.Add(new("Lutris",      "L",  "Game manager",          ResolveApp("lutris",      "net.lutris.Lutris"),      Color.FromRgb(255, 230, 100)));
+        items.Add(new("Bottles",     "B",  "Run Windows apps",      ResolveApp("bottles",     "com.usebottles.bottles"), Color.FromRgb(240,  70,  70)));
+        items.Add(new("Vesktop",     "V",  "Discord client",        ResolveApp("vesktop",     "dev.vencord.Vesktop"),    Color.FromRgb( 88, 101, 242)));
+        items.Add(new("Telegram",    "✈",  "Messaging",             ResolveApp("telegram-desktop","org.telegram.desktop"),Color.FromRgb( 42, 174, 245)));
+        items.Add(new("ProtonMail",  "P",  "Encrypted email",       "xdg-open https://mail.proton.me",                  Color.FromRgb(109,  74, 255)));
+        items.Add(new("YouTube",     "▶",  "Video streaming",       "xdg-open https://youtube.com",                     Color.FromRgb(255,   0,   0)));
+        items.Add(new("Twitch",      "T",  "Live streaming",        "xdg-open https://twitch.tv",                       Color.FromRgb(145,  70, 255)));
+        items.Add(new("GitHub",      "GH", "Code hosting",          "xdg-open https://github.com",                      Color.FromRgb( 36,  41,  46)));
         return items.ToArray();
     }
 
@@ -140,9 +157,18 @@ public partial class MainWindow
                     Description:  name,
                     Command:      $"xdg-open steam://rungameid/{appId}",
                     AccentColor:  AppIdToColor(int.Parse(appId)),
-                    WallpaperPath: FindSteamJpgArt(appId) ?? DefaultWallpaperPath);
+                    WallpaperPath: FindSteamJpgArt(appId) ?? DefaultWallpaperPath,
+                    SteamAppId:    appId,
+                    SteamInstallDir: GetSteamInstallDir(libraryPath, steamApp.InstallDir));
             }
         }
+    }
+
+    static string? GetSteamInstallDir(string libraryPath, string? installDir)
+    {
+        if (string.IsNullOrWhiteSpace(installDir)) return null;
+        string path = IOPath.Combine(libraryPath, "common", installDir);
+        return IODirectory.Exists(path) ? path : null;
     }
 
     static string? FindSteamRoot()
@@ -176,6 +202,7 @@ public partial class MainWindow
         string? appId = null;
         string? name = null;
         string? type = null;
+        string? installDir = null;
 
         try
         {
@@ -190,6 +217,7 @@ public partial class MainWindow
                 if (key == "appid") appId = value;
                 if (key == "name")  name  = value;
                 if (key == "type")  type  = value;
+                if (key == "installdir") installDir = value;
             }
         }
         catch { }
@@ -197,7 +225,7 @@ public partial class MainWindow
         if (string.IsNullOrWhiteSpace(appId) || string.IsNullOrWhiteSpace(name))
             return false;
 
-        app = new SteamAppManifest(appId, name, type);
+        app = new SteamAppManifest(appId, name, type, installDir);
         return true;
     }
 

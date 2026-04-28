@@ -46,6 +46,7 @@ public partial class MainWindow
     {
         var bmp = GetWallpaper(_current);
         WallpaperImage.Source = bmp;
+        UpdateSecondaryBackground();
 
         DimOverlay.Background = bmp != null
             ? new LinearGradientBrush
@@ -72,6 +73,13 @@ public partial class MainWindow
                     new GradientStop(Colors.Black, 0.65),
                 }
             };
+    }
+
+    void UpdateSecondaryBackground()
+    {
+        if (_secondaryWallpaperImage == null) return;
+        int idx = _current + 4;
+        _secondaryWallpaperImage.Source = idx < Items.Length ? GetWallpaper(idx) : null;
     }
 
     void UpdateInfo()
@@ -126,6 +134,52 @@ public partial class MainWindow
             Canvas.SetLeft(tile, x);
             Canvas.SetTop(tile, y);
             TilesCanvas.Children.Add(tile);
+        }
+
+        DrawSecondaryTiles();
+    }
+
+    void DrawSecondaryTiles()
+    {
+        var canvas = _secondaryTilesCanvas;
+        if (canvas == null) return;
+
+        canvas.Children.Clear();
+
+        double cw = canvas.Bounds.Width;
+        double ch = canvas.Bounds.Height;
+        if (cw <= 0 || ch <= 0) return;
+
+        const double tileSize = 80;
+        const double step     = tileSize + 16;
+        double cy = ch * 0.62 - tileSize / 2;
+        double x  = 48;
+
+        for (int i = _current + 4; i < Items.Length && x <= cw; i++, x += step)
+        {
+            double opacity = System.Math.Max(0.10, 0.50 - (i - _current - 4) * 0.06);
+
+            var tile = new Border
+            {
+                Width        = tileSize,
+                Height       = tileSize,
+                Background   = new SolidColorBrush(Items[i].AccentColor),
+                CornerRadius = new CornerRadius(10),
+                Opacity      = opacity,
+                Child = new TextBlock
+                {
+                    Text                = Items[i].Icon,
+                    FontSize            = tileSize * 0.37,
+                    FontWeight          = FontWeight.Bold,
+                    Foreground          = Brushes.White,
+                    HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
+                    VerticalAlignment   = Avalonia.Layout.VerticalAlignment.Center,
+                }
+            };
+
+            Canvas.SetLeft(tile, x);
+            Canvas.SetTop(tile, cy);
+            canvas.Children.Add(tile);
         }
     }
 }

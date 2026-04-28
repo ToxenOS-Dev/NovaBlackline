@@ -247,6 +247,57 @@
             </Border>
         </Grid>
 
+        <!-- Layer 7: Right sidebar menu -->
+        <Grid x:Name="MenuOverlay" IsVisible="False">
+
+            <!-- Dim background — clicking it closes the menu -->
+            <Border x:Name="MenuDimBackground" Background="#55000000"/>
+
+            <!-- Sidebar panel -->
+            <Border Background="{DynamicResource PanelBackgroundBrush}"
+                    BorderBrush="{DynamicResource AccentSettingsBorderBrush}"
+                    BorderThickness="1,0,0,0"
+                    HorizontalAlignment="Right"
+                    Width="280">
+                <StackPanel Margin="32,40,32,32" Spacing="20">
+
+                    <TextBlock Text="MENU"
+                               FontSize="13"
+                               FontWeight="Bold"
+                               Foreground="{DynamicResource AccentBrush}"/>
+
+                    <Rectangle Height="1" Fill="{DynamicResource AccentLineBrush}"/>
+
+                    <Border x:Name="CloseAppButton"
+                            Background="#AA1A1A1A"
+                            BorderBrush="#BB331111"
+                            BorderThickness="1"
+                            CornerRadius="8"
+                            Padding="0,14"
+                            Cursor="Hand">
+                        <StackPanel Orientation="Horizontal"
+                                    HorizontalAlignment="Center"
+                                    Spacing="10">
+                            <Ellipse Width="9" Height="9"
+                                     Fill="#FF4444"
+                                     VerticalAlignment="Center"/>
+                            <TextBlock Text="Close"
+                                       FontSize="14"
+                                       FontWeight="Bold"
+                                       Foreground="White"
+                                       VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+
+                </StackPanel>
+            </Border>
+        </Grid>
+
+        <!-- Fullscreen launch cover: hides Steam/desktop while a game starts -->
+        <Grid x:Name="LaunchCover" IsVisible="False">
+            <Border Background="Black"/>
+        </Grid>
+
         <!-- Start animation overlay — topmost, always on top during startup -->
         <Grid x:Name="StartOverlay">
             <Border Background="Black"/>

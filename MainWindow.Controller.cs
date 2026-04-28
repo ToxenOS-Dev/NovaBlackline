@@ -123,6 +123,7 @@ public partial class MainWindow
 
     void OnControllerLeft()
     {
+        if (_gameSessionActive) return;
         if (_layer == Layer.Shop)
         {
             if (_shopInContent && _shopGameIndex > 0)           { _shopGameIndex--; DrawShopContent(); }
@@ -136,6 +137,7 @@ public partial class MainWindow
 
     void OnControllerRight()
     {
+        if (_gameSessionActive) return;
         if (_layer == Layer.Shop)
         {
             if (_shopInContent && _shopGameIndex < FeaturedGames.Length - 1) { _shopGameIndex++; DrawShopContent(); }
@@ -149,6 +151,8 @@ public partial class MainWindow
 
     void OnControllerUp()
     {
+        if (_gameSessionActive) return;
+        if (_layer == Layer.Menu)     { if (_menuIndex > 0) { _menuIndex--; DrawMenuItems(); } return; }
         if (_layer == Layer.Shop)
         {
             if (_shopInContent) MoveShopContentUp();
@@ -160,6 +164,8 @@ public partial class MainWindow
 
     void OnControllerDown()
     {
+        if (_gameSessionActive) return;
+        if (_layer == Layer.Menu)     { if (_menuIndex < MenuItems.Length - 1) { _menuIndex++; DrawMenuItems(); } return; }
         if (_layer == Layer.Shop)
         {
             if (_shopInContent) MoveShopContentDown();
@@ -172,6 +178,7 @@ public partial class MainWindow
 
     void OnControllerEnter()
     {
+        if (_gameSessionActive) return;
         if (_animating) { SkipAnimation(); return; }
         if (_layer == Layer.Shop)
         {
@@ -180,6 +187,7 @@ public partial class MainWindow
             else ActivateCurrentShopTab();
             return;
         }
+        if (_layer == Layer.Menu)     { ActivateMenuItem(); return; }
         if (_layer == Layer.Settings) return;
         if (_layer == Layer.TopBar)   ActivateTopBarItem(_topBarIndex);
         else                          Launch(Items[_current]);
@@ -187,10 +195,11 @@ public partial class MainWindow
 
     void OnControllerBack()
     {
+        if (_gameSessionActive) return;
         if (_animating) { SkipAnimation(); return; }
+        if (_layer == Layer.Menu)     { CloseMenu(); return; }
         if (_layer == Layer.Shop)     { if (_shopInContent) { _shopInContent = false; DrawShopTabs(); DrawShopContent(); UpdateShopFooter(); } else CloseShop(); return; }
         if (_layer == Layer.Settings) { CloseSettings(); return; }
         if (_layer == Layer.TopBar)   { _layer = Layer.Tiles; UpdateTopBar(); return; }
-        Close();
     }
 }

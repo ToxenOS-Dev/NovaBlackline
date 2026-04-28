@@ -32,6 +32,7 @@ public partial class MainWindow
         [
             new("Display",  "Theme",            ["Blackline", "Midnight", "Graphite"],       0, ApplyTheme),
             new("Display",  "Accent Color",     ["Yellow", "White", "Cyan", "Red", "Green"], 0, ApplyAccent),
+            new("Display",  "Primary Display Only", ["On", "Off"],                           0, ApplyPrimaryDisplayOnly),
             new("Time",     "Time Zone",        TimeZoneOptions.Select(t => t.Label).ToArray(), 0, ApplyTimeZone),
             new("Time",     "Clock Format",     ["24-hour", "12-hour"],                       0, ApplyClockFormat),
             new("Language", "Language",         ["English", "Danish"],                        0, ApplyLanguage),
@@ -40,7 +41,8 @@ public partial class MainWindow
         _settingValues = _settings.Select(s => s.Default).ToArray();
         UpdateAccentResources();
         ApplyTheme(_settingValues[0]);
-        ApplyLanguage(_settingValues[4]);
+        ApplyPrimaryDisplayOnly(_settingValues[2]);
+        ApplyLanguage(_settingValues[5]);
     }
 
     void OpenSettings()
@@ -252,6 +254,7 @@ public partial class MainWindow
     {
         "Theme"            => T("Theme", "Tema"),
         "Accent Color"     => T("Accent Color", "Accentfarve"),
+        "Primary Display Only" => T("Primary Display Only", "Kun primær skærm"),
         "Time Zone"        => T("Time Zone", "Tidszone"),
         "Clock Format"     => T("Clock Format", "Urformat"),
         "Language"         => T("Language", "Sprog"),

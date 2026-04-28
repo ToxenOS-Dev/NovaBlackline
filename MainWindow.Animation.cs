@@ -30,6 +30,9 @@ public partial class MainWindow
 
         try
         {
+            UpdateSecondaryDisplayWindow();
+            PlaySecondaryDisplayFade();
+
             StartLogoGroup.Opacity = 1.0;
             await Task.Delay(900 + 900, ct);
 

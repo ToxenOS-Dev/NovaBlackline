@@ -8,11 +8,24 @@ public partial class MainWindow
 {
     private void OnKeyDown(object? sender, KeyEventArgs e)
     {
+        if (_gameSessionActive) return;
         if (_animating) { SkipAnimation(); return; }
 
         if (_layer == Layer.Shop)
         {
             HandleShopKey(e.Key);
+            return;
+        }
+
+        if (_layer == Layer.Menu)
+        {
+            switch (e.Key)
+            {
+                case Key.Up   when _menuIndex > 0:                      _menuIndex--; DrawMenuItems(); break;
+                case Key.Down when _menuIndex < MenuItems.Length - 1:   _menuIndex++; DrawMenuItems(); break;
+                case Key.Enter:  ActivateMenuItem(); break;
+                case Key.Escape: CloseMenu(); break;
+            }
             return;
         }
 
@@ -55,8 +68,8 @@ public partial class MainWindow
             case Key.Enter when _layer == Layer.Tiles:
                 Launch(Items[_current]); break;
 
-            case Key.Escape:
-                Close(); break;
+            case Key.Escape when _layer == Layer.TopBar:
+                _layer = Layer.Tiles; UpdateTopBar(); break;
         }
     }
 
@@ -77,7 +90,7 @@ public partial class MainWindow
         {
             case 0: OpenShop();     break;
             case 1: OpenSettings(); break;
-            case 2: break;
+            case 2: OpenMenu(); break;
         }
     }
 }

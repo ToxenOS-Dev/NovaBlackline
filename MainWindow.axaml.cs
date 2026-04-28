@@ -29,6 +29,9 @@ public partial class MainWindow : Window
     TimeZoneInfo _clockTimeZone = TimeZoneInfo.Local;
     string       _clockFormat   = "HH:mm";
     int          _languageIndex = 0;
+    bool         _primaryDisplayOnly = true;
+
+    int  _menuIndex       = 0;
 
     int  _shopTabIndex    = 0;
     bool _shopInContent   = false;
@@ -39,6 +42,11 @@ public partial class MainWindow : Window
     CancellationTokenSource? _switchCts;
     DateTime                 _lastSwitchAt = DateTime.MinValue;
     bool                     _animating = true;
+    bool                     _gameSessionActive = false;
+    bool                     _mainWindowOpened = false;
+    Window?                  _secondaryDisplayWindow;
+    Canvas?                  _secondaryTilesCanvas;
+    Image?                   _secondaryWallpaperImage;
     readonly HashSet<string>       _monitoredControllers = new();
     readonly Dictionary<int, Bitmap?> _wallpapers        = new();
 
@@ -47,6 +55,12 @@ public partial class MainWindow : Window
         InitializeComponent();
         Cursor = new Cursor(StandardCursorType.None);
         InitSettings();
+        Opened += (_, _) =>
+        {
+            _mainWindowOpened = true;
+            ApplyDisplayPlacement();
+        };
+        Screens.Changed += (_, _) => ApplyDisplayPlacement();
 
         KeyDown += OnKeyDown;
         TilesCanvas.SizeChanged += (_, _) => DrawTiles();
@@ -54,6 +68,9 @@ public partial class MainWindow : Window
         StoreButton.PointerPressed    += (_, _) => ActivateTopBarItem(0);
         SettingsButton.PointerPressed += (_, _) => ActivateTopBarItem(1);
         MenuButton.PointerPressed     += (_, _) => ActivateTopBarItem(2);
+
+        CloseAppButton.PointerPressed  += (_, _) => Close();
+        MenuDimBackground.PointerPressed += (_, _) => CloseMenu();
 
         _clockTimer = new Timer(
             _ => Dispatcher.UIThread.Post(UpdateClock),

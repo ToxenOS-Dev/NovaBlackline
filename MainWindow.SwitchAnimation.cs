@@ -33,11 +33,18 @@ public partial class MainWindow
         _current = newIndex;
         UpdateAll();
 
+        var secondaryTransform = EnsureSecondaryTileTransform();
+
         tilesTransform.X = (fastRepeat ? 18 : 34) * direction;
         TilesCanvas.Opacity = fastRepeat ? 0.75 : 0.35;
         ItemNameText.Opacity = fastRepeat ? 0.7 : 0;
         ItemDescText.Opacity = fastRepeat ? 0.7 : 0;
         WallpaperImage.Opacity = fastRepeat ? 0.85 : 0.55;
+        if (secondaryTransform != null)
+        {
+            secondaryTransform.X = (fastRepeat ? 18 : 34) * direction;
+            _secondaryTilesCanvas!.Opacity = fastRepeat ? 0.75 : 0.35;
+        }
 
         try
         {
@@ -49,6 +56,11 @@ public partial class MainWindow
             ItemNameText.Opacity = 1;
             ItemDescText.Opacity = 1;
             WallpaperImage.Opacity = 1;
+            if (secondaryTransform != null)
+            {
+                secondaryTransform.X = 0;
+                _secondaryTilesCanvas!.Opacity = 1;
+            }
 
             await Task.Delay(duration, ct);
         }
@@ -62,6 +74,18 @@ public partial class MainWindow
 
         transform = new TranslateTransform();
         TilesCanvas.RenderTransform = transform;
+        return transform;
+    }
+
+    TranslateTransform? EnsureSecondaryTileTransform()
+    {
+        var canvas = _secondaryTilesCanvas;
+        if (canvas == null) return null;
+
+        if (canvas.RenderTransform is TranslateTransform t) return t;
+
+        var transform = new TranslateTransform();
+        canvas.RenderTransform = transform;
         return transform;
     }
 
@@ -91,6 +115,19 @@ public partial class MainWindow
         [
             new DoubleTransition { Property = Visual.OpacityProperty, Duration = duration, Easing = easing },
         ];
+
+        var secondaryTransform = EnsureSecondaryTileTransform();
+        if (secondaryTransform != null)
+        {
+            _secondaryTilesCanvas!.Transitions =
+            [
+                new DoubleTransition { Property = Visual.OpacityProperty, Duration = duration, Easing = easing },
+            ];
+            secondaryTransform.Transitions =
+            [
+                new DoubleTransition { Property = TranslateTransform.XProperty, Duration = duration, Easing = easing },
+            ];
+        }
     }
 
     void ClearSwitchTransitions()
@@ -100,5 +137,11 @@ public partial class MainWindow
         ItemNameText.Transitions = null;
         ItemDescText.Transitions = null;
         WallpaperImage.Transitions = null;
+
+        if (_secondaryTilesCanvas != null)
+        {
+            _secondaryTilesCanvas.Transitions = null;
+            EnsureSecondaryTileTransform()!.Transitions = null;
+        }
     }
 }
