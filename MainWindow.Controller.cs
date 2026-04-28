@@ -131,7 +131,7 @@ public partial class MainWindow
         }
         if (_layer == Layer.Settings)                           { ChangeSettingValue(-1); return; }
         if (_layer == Layer.TopBar && _topBarIndex > 0)         { _topBarIndex--; UpdateTopBar(); return; }
-        if (_layer == Layer.Tiles  && _current > 0)             { _current--; UpdateAll(); }
+        if (_layer == Layer.Tiles  && _current > 0)             { SwitchToItem(_current - 1); }
     }
 
     void OnControllerRight()
@@ -144,7 +144,7 @@ public partial class MainWindow
         }
         if (_layer == Layer.Settings)                                { ChangeSettingValue(+1); return; }
         if (_layer == Layer.TopBar && _topBarIndex < 2)              { _topBarIndex++; UpdateTopBar(); return; }
-        if (_layer == Layer.Tiles  && _current < Items.Length - 1)   { _current++; UpdateAll(); }
+        if (_layer == Layer.Tiles  && _current < Items.Length - 1)   { SwitchToItem(_current + 1); }
     }
 
     void OnControllerUp()

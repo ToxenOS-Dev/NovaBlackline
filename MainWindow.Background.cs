@@ -54,10 +54,10 @@ public partial class MainWindow
                 EndPoint      = new RelativePoint(0.5, 1, RelativeUnit.Relative),
                 GradientStops = new GradientStops
                 {
-                    new GradientStop(Color.FromArgb(210, 0, 0, 0), 0.00),
-                    new GradientStop(Color.FromArgb(80,  0, 0, 0), 0.35),
-                    new GradientStop(Color.FromArgb(80,  0, 0, 0), 0.65),
-                    new GradientStop(Color.FromArgb(220, 0, 0, 0), 1.00),
+                    new GradientStop(Color.FromArgb(_theme.DimTop,    _theme.WindowBackground.R, _theme.WindowBackground.G, _theme.WindowBackground.B), 0.00),
+                    new GradientStop(Color.FromArgb(_theme.DimMiddle, _theme.WindowBackground.R, _theme.WindowBackground.G, _theme.WindowBackground.B), 0.35),
+                    new GradientStop(Color.FromArgb(_theme.DimMiddle, _theme.WindowBackground.R, _theme.WindowBackground.G, _theme.WindowBackground.B), 0.65),
+                    new GradientStop(Color.FromArgb(_theme.DimBottom, _theme.WindowBackground.R, _theme.WindowBackground.G, _theme.WindowBackground.B), 1.00),
                 }
             }
             : new LinearGradientBrush

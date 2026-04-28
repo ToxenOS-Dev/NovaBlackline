@@ -4,6 +4,19 @@
         WindowState="FullScreen"
         Background="Black">
 
+    <Window.Resources>
+        <SolidColorBrush x:Key="AccentBrush" Color="#FFD700"/>
+        <SolidColorBrush x:Key="AccentLineBrush" Color="#55FFD700"/>
+        <SolidColorBrush x:Key="AccentButtonBackgroundBrush" Color="#1AFFD700"/>
+        <SolidColorBrush x:Key="AccentButtonBorderBrush" Color="#44FFD700"/>
+        <SolidColorBrush x:Key="AccentShopBorderBrush" Color="#33FFD700"/>
+        <SolidColorBrush x:Key="AccentDividerBrush" Color="#22FFD700"/>
+        <SolidColorBrush x:Key="AccentSettingsBorderBrush" Color="#55FFD700"/>
+        <SolidColorBrush x:Key="WindowBackgroundBrush" Color="#000000"/>
+        <SolidColorBrush x:Key="OverlayBackgroundBrush" Color="#DD000000"/>
+        <SolidColorBrush x:Key="PanelBackgroundBrush" Color="#0F0F0F"/>
+    </Window.Resources>
+
     <Grid>
 
         <!-- Layer 1: App wallpaper -->
@@ -43,26 +56,27 @@
                     </Border.Background>
                 </Border>
 
-                <!-- Yellow accent line along the bottom of the bar -->
-                <Rectangle Height="1" VerticalAlignment="Bottom" Fill="#55FFD700"/>
+                <!-- Accent line along the bottom of the bar -->
+                <Rectangle Height="1" VerticalAlignment="Bottom" Fill="{DynamicResource AccentLineBrush}"/>
 
                 <!-- Bar content -->
                 <Grid Margin="50,0">
 
-                    <!-- Left: yellow pip + title -->
+                    <!-- Left: accent pip + title -->
                     <StackPanel Orientation="Horizontal"
                                 HorizontalAlignment="Left"
                                 VerticalAlignment="Center"
                                 Spacing="14">
                         <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
-                            <Rectangle Width="4" Height="18" Fill="#FFD700" RadiusX="2" RadiusY="2" VerticalAlignment="Center"/>
-                            <Rectangle Width="4" Height="22" Fill="#FFD700" RadiusX="2" RadiusY="2" VerticalAlignment="Center"/>
-                            <Rectangle Width="4" Height="26" Fill="#FFD700" RadiusX="2" RadiusY="2" VerticalAlignment="Center"/>
+                            <Rectangle Width="4" Height="18" Fill="{DynamicResource AccentBrush}" RadiusX="2" RadiusY="2" VerticalAlignment="Center"/>
+                            <Rectangle Width="4" Height="22" Fill="{DynamicResource AccentBrush}" RadiusX="2" RadiusY="2" VerticalAlignment="Center"/>
+                            <Rectangle Width="4" Height="26" Fill="{DynamicResource AccentBrush}" RadiusX="2" RadiusY="2" VerticalAlignment="Center"/>
                         </StackPanel>
-                        <TextBlock Text="NOVA BLACKLINE"
+                        <TextBlock x:Name="TopTitleText"
+                                   Text="NOVA BLACKLINE"
                                    FontSize="17"
                                    FontWeight="Bold"
-                                   Foreground="#FFD700"
+                                   Foreground="{DynamicResource AccentBrush}"
                                    VerticalAlignment="Center"/>
                     </StackPanel>
 
@@ -83,45 +97,46 @@
 
                         <!-- Store button -->
                         <Border x:Name="StoreButton"
-                                Background="#1AFFD700"
-                                BorderBrush="#44FFD700"
+                                Background="{DynamicResource AccentButtonBackgroundBrush}"
+                                BorderBrush="{DynamicResource AccentButtonBorderBrush}"
                                 BorderThickness="1"
                                 CornerRadius="6"
                                 Padding="14,6"
                                 Cursor="Hand">
-                            <TextBlock Text="STORE"
+                            <TextBlock x:Name="StoreText"
+                                       Text="STORE"
                                        FontSize="12"
                                        FontWeight="Bold"
-                                       Foreground="#FFD700"
+                                       Foreground="{DynamicResource AccentBrush}"
                                        VerticalAlignment="Center"/>
                         </Border>
 
                         <!-- Settings button -->
                         <Border x:Name="SettingsButton"
-                                Background="#1AFFD700"
-                                BorderBrush="#44FFD700"
+                                Background="{DynamicResource AccentButtonBackgroundBrush}"
+                                BorderBrush="{DynamicResource AccentButtonBorderBrush}"
                                 BorderThickness="1"
                                 CornerRadius="6"
                                 Padding="12,6"
                                 Cursor="Hand">
                             <TextBlock Text="⚙"
                                        FontSize="14"
-                                       Foreground="#FFD700"
+                                       Foreground="{DynamicResource AccentBrush}"
                                        VerticalAlignment="Center"/>
                         </Border>
 
                         <!-- Hamburger menu -->
                         <Border x:Name="MenuButton"
-                                Background="#1AFFD700"
-                                BorderBrush="#44FFD700"
+                                Background="{DynamicResource AccentButtonBackgroundBrush}"
+                                BorderBrush="{DynamicResource AccentButtonBorderBrush}"
                                 BorderThickness="1"
                                 CornerRadius="6"
                                 Padding="11,9"
                                 Cursor="Hand">
                             <StackPanel Spacing="4" VerticalAlignment="Center">
-                                <Rectangle Width="18" Height="2" Fill="#FFD700"/>
-                                <Rectangle Width="18" Height="2" Fill="#FFD700"/>
-                                <Rectangle Width="18" Height="2" Fill="#FFD700"/>
+                                <Rectangle Width="18" Height="2" Fill="{DynamicResource AccentBrush}"/>
+                                <Rectangle Width="18" Height="2" Fill="{DynamicResource AccentBrush}"/>
+                                <Rectangle Width="18" Height="2" Fill="{DynamicResource AccentBrush}"/>
                             </StackPanel>
                         </Border>
 
@@ -140,7 +155,7 @@
                 <TextBlock x:Name="ItemNameText"
                            FontSize="34"
                            FontWeight="Bold"
-                           Foreground="#FFD700"
+                           Foreground="{DynamicResource AccentBrush}"
                            HorizontalAlignment="Center"
                            TextAlignment="Center"/>
                 <TextBlock x:Name="ItemDescText"
@@ -149,7 +164,8 @@
                            Opacity="0.45"
                            HorizontalAlignment="Center"
                            TextAlignment="Center"/>
-                <TextBlock Text="←  →   navigate        ENTER   launch        ESC   quit"
+                <TextBlock x:Name="BottomHintText"
+                           Text="←  →   navigate        ENTER   launch        ESC   quit"
                            FontSize="11"
                            Foreground="White"
                            Opacity="0.22"
@@ -161,9 +177,9 @@
 
         <!-- Layer 5: Shop overlay -->
         <Grid x:Name="ShopOverlay" IsVisible="False">
-            <Border Background="#EE000000"/>
-            <Border Background="#0A0A0A"
-                    BorderBrush="#33FFD700"
+            <Border Background="{DynamicResource OverlayBackgroundBrush}"/>
+            <Border Background="{DynamicResource PanelBackgroundBrush}"
+                    BorderBrush="{DynamicResource AccentShopBorderBrush}"
                     BorderThickness="1"
                     CornerRadius="16"
                     Width="900"
@@ -180,14 +196,14 @@
                                 VerticalAlignment="Stretch"
                                 Margin="8,0"/>
 
-                    <Rectangle Grid.Row="1" Fill="#22FFD700"/>
+                    <Rectangle Grid.Row="1" Fill="{DynamicResource AccentDividerBrush}"/>
 
                     <!-- Content -->
                     <ScrollViewer Grid.Row="2">
                         <StackPanel x:Name="ShopContent" Margin="30,24,30,0"/>
                     </ScrollViewer>
 
-                    <Rectangle Grid.Row="3" Fill="#22FFD700"/>
+                    <Rectangle Grid.Row="3" Fill="{DynamicResource AccentDividerBrush}"/>
 
                     <!-- Footer hint (updated in code based on focus level) -->
                     <TextBlock x:Name="ShopFooterHint"
@@ -203,9 +219,9 @@
 
         <!-- Layer 6: Settings overlay — must be last so it renders on top of everything -->
         <Grid x:Name="SettingsOverlay" IsVisible="False">
-            <Border Background="#DD000000"/>
-            <Border Background="#0F0F0F"
-                    BorderBrush="#55FFD700"
+            <Border Background="{DynamicResource OverlayBackgroundBrush}"/>
+            <Border Background="{DynamicResource PanelBackgroundBrush}"
+                    BorderBrush="{DynamicResource AccentSettingsBorderBrush}"
                     BorderThickness="1"
                     CornerRadius="14"
                     Width="560"
@@ -213,13 +229,15 @@
                     VerticalAlignment="Center"
                     Padding="48,40">
                 <StackPanel>
-                    <TextBlock Text="SETTINGS"
+                    <TextBlock x:Name="SettingsTitleText"
+                               Text="SETTINGS"
                                FontSize="20"
                                FontWeight="Bold"
-                               Foreground="#FFD700"
+                               Foreground="{DynamicResource AccentBrush}"
                                Margin="0,0,0,28"/>
                     <StackPanel x:Name="SettingsRows" Spacing="4"/>
-                    <TextBlock Text="↑ ↓  select        ← →  change        ESC  close"
+                    <TextBlock x:Name="SettingsHintText"
+                               Text="↑ ↓  select        ← →  change        ESC  close"
                                FontSize="11"
                                Foreground="White"
                                Opacity="0.25"
@@ -243,14 +261,15 @@
                             Spacing="18"
                             Opacity="0">
                     <StackPanel Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
-                        <Rectangle Width="5" Height="20" Fill="#FFD700" RadiusX="2" RadiusY="2" VerticalAlignment="Center"/>
-                        <Rectangle Width="5" Height="26" Fill="#FFD700" RadiusX="2" RadiusY="2" VerticalAlignment="Center"/>
-                        <Rectangle Width="5" Height="32" Fill="#FFD700" RadiusX="2" RadiusY="2" VerticalAlignment="Center"/>
+                        <Rectangle Width="5" Height="20" Fill="{DynamicResource AccentBrush}" RadiusX="2" RadiusY="2" VerticalAlignment="Center"/>
+                        <Rectangle Width="5" Height="26" Fill="{DynamicResource AccentBrush}" RadiusX="2" RadiusY="2" VerticalAlignment="Center"/>
+                        <Rectangle Width="5" Height="32" Fill="{DynamicResource AccentBrush}" RadiusX="2" RadiusY="2" VerticalAlignment="Center"/>
                     </StackPanel>
-                    <TextBlock Text="NOVA BLACKLINE"
+                    <TextBlock x:Name="StartTitleText"
+                               Text="NOVA BLACKLINE"
                                FontSize="52"
                                FontWeight="Bold"
-                               Foreground="#FFD700"
+                               Foreground="{DynamicResource AccentBrush}"
                                VerticalAlignment="Center"/>
                 </StackPanel>
 

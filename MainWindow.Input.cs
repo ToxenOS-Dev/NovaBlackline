@@ -44,10 +44,10 @@ public partial class MainWindow
                 _topBarIndex++; UpdateTopBar(); break;
 
             case Key.Left when _layer == Layer.Tiles && _current > 0:
-                _current--; UpdateAll(); break;
+                SwitchToItem(_current - 1); break;
 
             case Key.Right when _layer == Layer.Tiles && _current < Items.Length - 1:
-                _current++; UpdateAll(); break;
+                SwitchToItem(_current + 1); break;
 
             case Key.Enter when _layer == Layer.TopBar:
                 ActivateTopBarItem(_topBarIndex); break;

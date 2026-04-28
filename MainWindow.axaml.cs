@@ -16,6 +16,7 @@ public partial class MainWindow : Window
     static readonly double[] TileOpacity = [1.0, 0.6, 0.35, 0.18];
 
     Color _accent = Color.FromRgb(255, 215, 0);
+    ThemeProfile _theme = new(Color.FromRgb(0, 0, 0), Color.FromArgb(0xDD, 0, 0, 0), Color.FromRgb(15, 15, 15), 210, 80, 220);
 
     int   _current;
     Layer _layer       = Layer.Tiles;
@@ -25,6 +26,9 @@ public partial class MainWindow : Window
     SettingRow[] _settings = [];
     int[]        _settingValues = [];
     int          _settingIndex  = 0;
+    TimeZoneInfo _clockTimeZone = TimeZoneInfo.Local;
+    string       _clockFormat   = "HH:mm";
+    int          _languageIndex = 0;
 
     int  _shopTabIndex    = 0;
     bool _shopInContent   = false;
@@ -32,6 +36,8 @@ public partial class MainWindow : Window
 
     Timer?                   _clockTimer;
     CancellationTokenSource? _animCts;
+    CancellationTokenSource? _switchCts;
+    DateTime                 _lastSwitchAt = DateTime.MinValue;
     bool                     _animating = true;
     readonly HashSet<string>       _monitoredControllers = new();
     readonly Dictionary<int, Bitmap?> _wallpapers        = new();
@@ -60,7 +66,7 @@ public partial class MainWindow : Window
         PlayStartAnimation();
     }
 
-    void UpdateClock() => ClockText.Text = DateTime.Now.ToString("HH:mm");
+    void UpdateClock() => ClockText.Text = TimeZoneInfo.ConvertTime(DateTimeOffset.Now, _clockTimeZone).ToString(_clockFormat);
 
     void UpdateAll()
     {
