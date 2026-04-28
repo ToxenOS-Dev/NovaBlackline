@@ -10,11 +10,7 @@
         <Image x:Name="WallpaperImage"
                Stretch="UniformToFill"
                HorizontalAlignment="Stretch"
-               VerticalAlignment="Stretch">
-            <Image.Effect>
-                <BlurEffect Radius="18"/>
-            </Image.Effect>
-        </Image>
+               VerticalAlignment="Stretch"/>
 
         <!-- Layer 2: Vignette / color overlay -->
         <Border x:Name="DimOverlay"/>
