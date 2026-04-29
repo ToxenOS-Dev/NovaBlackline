@@ -58,9 +58,24 @@ public partial class MainWindow
         return Screens.All.FirstOrDefault(screen => !screen.Equals(primary));
     }
 
+    bool AreScreensMirrored()
+    {
+        var all = Screens.All;
+        for (int i = 0; i < all.Count; i++)
+            for (int j = i + 1; j < all.Count; j++)
+            {
+                var a = all[i].Bounds;
+                var b = all[j].Bounds;
+                bool overlaps = a.X < b.X + b.Width  && a.X + a.Width  > b.X &&
+                                a.Y < b.Y + b.Height && a.Y + a.Height > b.Y;
+                if (overlaps) return true;
+            }
+        return false;
+    }
+
     void UpdateSecondaryDisplayWindow()
     {
-        if (_primaryDisplayOnly || Screens.ScreenCount < 2)
+        if (_primaryDisplayOnly || Screens.ScreenCount < 2 || AreScreensMirrored())
         {
             CloseSecondaryDisplayWindow();
             return;
