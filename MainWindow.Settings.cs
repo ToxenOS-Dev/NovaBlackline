@@ -37,6 +37,7 @@ public partial class MainWindow
             new("Time",     "Clock Format",     ["24-hour", "12-hour"],                       0, ApplyClockFormat),
             new("Language", "Language",         ["English", "Danish"],                        0, ApplyLanguage),
             new("Controls", "Navigation Speed", ["Slow", "Normal", "Fast"],                  1, ApplyNavSpeed),
+            new("Apps",     "Apps",             ["On", "Off", "Custom"],                     0, ApplyAppsMode),
         ];
         _settingValues = _settings.Select(s => s.Default).ToArray();
         UpdateAccentResources();
@@ -58,6 +59,24 @@ public partial class MainWindow
         _layer = Layer.Tiles;
         SettingsOverlay.IsVisible = false;
         UpdateTopBar();
+    }
+
+    int EffectiveSettingCount => _settings.Length + (_appsMode == 2 ? DetectedApps.Length : 0);
+
+    void ChangeSettingOrApp(int dir)
+    {
+        if (_settingIndex < _settings.Length)
+        {
+            ChangeSettingValue(dir);
+            return;
+        }
+
+        var app = DetectedApps[_settingIndex - _settings.Length];
+        if (_customApps.Contains(app.Name)) _customApps.Remove(app.Name);
+        else                                _customApps.Add(app.Name);
+        RebuildItems();
+        UpdateAll();
+        DrawSettingsRows();
     }
 
     void DrawSettingsRows()
@@ -142,6 +161,59 @@ public partial class MainWindow
             grid.Children.Add(valueRow);
             row.Child = grid;
             SettingsRows.Children.Add(row);
+        }
+
+        if (_appsMode != 2 || DetectedApps.Length == 0) return;
+
+        SettingsRows.Children.Add(new TextBlock
+        {
+            Text       = "APP SELECTION",
+            FontSize   = 11,
+            FontWeight = FontWeight.Bold,
+            Foreground = new SolidColorBrush(Color.FromArgb(150, _accent.R, _accent.G, _accent.B)),
+            Margin     = new Thickness(4, 18, 0, 4),
+        });
+
+        for (int i = 0; i < DetectedApps.Length; i++)
+        {
+            int  virtualIdx = _settings.Length + i;
+            bool sel        = virtualIdx == _settingIndex;
+            var  app        = DetectedApps[i];
+            bool enabled    = _customApps.Contains(app.Name);
+
+            var appRow = new Border
+            {
+                Background      = new SolidColorBrush(Color.FromArgb(sel ? (byte)45 : (byte)0, _accent.R, _accent.G, _accent.B)),
+                BorderBrush     = new SolidColorBrush(Color.FromArgb(sel ? (byte)80 : (byte)0, _accent.R, _accent.G, _accent.B)),
+                BorderThickness = new Thickness(1),
+                CornerRadius    = new CornerRadius(8),
+                Padding         = new Thickness(20, 14),
+                Margin          = new Thickness(0, 2),
+            };
+
+            var grid = new Grid();
+            grid.ColumnDefinitions.Add(new ColumnDefinition(1, GridUnitType.Star));
+            grid.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Auto));
+
+            grid.Children.Add(new TextBlock
+            {
+                Text              = app.Name,
+                FontSize          = 15,
+                Foreground        = sel ? new SolidColorBrush(_accent) : Brushes.White,
+                FontWeight        = sel ? FontWeight.Bold : FontWeight.Normal,
+                VerticalAlignment = VerticalAlignment.Center,
+            });
+
+            byte arrowAlpha = sel ? (byte)255 : (byte)60;
+            var  valueRow   = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 14, VerticalAlignment = VerticalAlignment.Center };
+            Grid.SetColumn(valueRow, 1);
+            valueRow.Children.Add(new TextBlock { Text = "◄", FontSize = 13, Foreground = new SolidColorBrush(Color.FromArgb(arrowAlpha, _accent.R, _accent.G, _accent.B)), VerticalAlignment = VerticalAlignment.Center });
+            valueRow.Children.Add(new TextBlock { Text = enabled ? "On" : "Off", FontSize = 14, Foreground = Brushes.White, MinWidth = 72, TextAlignment = TextAlignment.Center, VerticalAlignment = VerticalAlignment.Center });
+            valueRow.Children.Add(new TextBlock { Text = "►", FontSize = 13, Foreground = new SolidColorBrush(Color.FromArgb(arrowAlpha, _accent.R, _accent.G, _accent.B)), VerticalAlignment = VerticalAlignment.Center });
+
+            grid.Children.Add(valueRow);
+            appRow.Child = grid;
+            SettingsRows.Children.Add(appRow);
         }
     }
 
@@ -233,6 +305,14 @@ public partial class MainWindow
         _navRepeatMs = delays[idx];
     }
 
+    void ApplyAppsMode(int idx)
+    {
+        _appsMode = idx;
+        RebuildItems();
+        UpdateAll();
+        if (SettingsOverlay.IsVisible) DrawSettingsRows();
+    }
+
     static TimeZoneInfo FindTimeZone(string id)
     {
         try { return TimeZoneInfo.FindSystemTimeZoneById(id); }
@@ -247,18 +327,20 @@ public partial class MainWindow
         "Time"     => T("Time", "Tid"),
         "Language" => T("Language", "Sprog"),
         "Controls" => T("Controls", "Styring"),
+        "Apps"     => T("Apps", "Apps"),
         _ => category,
     };
 
     string TranslateSetting(string label) => label switch
     {
-        "Theme"            => T("Theme", "Tema"),
-        "Accent Color"     => T("Accent Color", "Accentfarve"),
+        "Theme"                => T("Theme", "Tema"),
+        "Accent Color"         => T("Accent Color", "Accentfarve"),
         "Primary Display Only" => T("Primary Display Only", "Kun primær skærm"),
-        "Time Zone"        => T("Time Zone", "Tidszone"),
-        "Clock Format"     => T("Clock Format", "Urformat"),
-        "Language"         => T("Language", "Sprog"),
-        "Navigation Speed" => T("Navigation Speed", "Navigationshastighed"),
+        "Time Zone"            => T("Time Zone", "Tidszone"),
+        "Clock Format"         => T("Clock Format", "Urformat"),
+        "Language"             => T("Language", "Sprog"),
+        "Navigation Speed"     => T("Navigation Speed", "Navigationshastighed"),
+        "Apps"                 => T("Apps", "Apps"),
         _ => label,
     };
 }

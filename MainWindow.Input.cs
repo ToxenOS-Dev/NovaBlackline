@@ -17,6 +17,12 @@ public partial class MainWindow
             return;
         }
 
+        if (_layer == Layer.Library)
+        {
+            HandleLibraryKey(e.Key);
+            return;
+        }
+
         if (_layer == Layer.Menu)
         {
             switch (e.Key)
@@ -33,10 +39,10 @@ public partial class MainWindow
         {
             switch (e.Key)
             {
-                case Key.Up   when _settingIndex > 0:                    _settingIndex--; DrawSettingsRows(); break;
-                case Key.Down when _settingIndex < _settings.Length - 1: _settingIndex++; DrawSettingsRows(); break;
-                case Key.Left:  ChangeSettingValue(-1); break;
-                case Key.Right: ChangeSettingValue(+1); break;
+                case Key.Up   when _settingIndex > 0:                           _settingIndex--; DrawSettingsRows(); break;
+                case Key.Down when _settingIndex < EffectiveSettingCount - 1:   _settingIndex++; DrawSettingsRows(); break;
+                case Key.Left:  ChangeSettingOrApp(-1); break;
+                case Key.Right: ChangeSettingOrApp(+1); break;
                 case Key.Escape: CloseSettings(); break;
             }
             return;
@@ -53,7 +59,7 @@ public partial class MainWindow
             case Key.Left when _layer == Layer.TopBar && _topBarIndex > 0:
                 _topBarIndex--; UpdateTopBar(); break;
 
-            case Key.Right when _layer == Layer.TopBar && _topBarIndex < 2:
+            case Key.Right when _layer == Layer.TopBar && _topBarIndex < 3:
                 _topBarIndex++; UpdateTopBar(); break;
 
             case Key.Left when _layer == Layer.Tiles && _current > 0:
@@ -75,7 +81,7 @@ public partial class MainWindow
 
     void UpdateTopBar()
     {
-        Border[] buttons = [StoreButton, SettingsButton, MenuButton];
+        Border[] buttons = [StoreButton, LibraryButton, SettingsButton, MenuButton];
         for (int i = 0; i < buttons.Length; i++)
         {
             bool focused = _layer == Layer.TopBar && i == _topBarIndex;
@@ -89,8 +95,9 @@ public partial class MainWindow
         switch (index)
         {
             case 0: OpenShop();     break;
-            case 1: OpenSettings(); break;
-            case 2: OpenMenu(); break;
+            case 1: OpenLibrary();  break;
+            case 2: OpenSettings(); break;
+            case 3: OpenMenu();     break;
         }
     }
 }

@@ -5,6 +5,7 @@ using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 
 namespace NovaBlackline;
@@ -31,6 +32,10 @@ public partial class MainWindow : Window
     int          _languageIndex = 0;
     bool         _primaryDisplayOnly = true;
 
+    LaunchItem[]      Items        = [];
+    int               _appsMode    = 0;
+    HashSet<string>   _customApps  = new(DetectedApps.Select(a => a.Name));
+
     int  _menuIndex       = 0;
 
     int  _shopTabIndex    = 0;
@@ -55,6 +60,7 @@ public partial class MainWindow : Window
         InitializeComponent();
         Cursor = new Cursor(StandardCursorType.None);
         InitSettings();
+        RebuildItems();
         Opened += (_, _) =>
         {
             _mainWindowOpened = true;
@@ -66,8 +72,9 @@ public partial class MainWindow : Window
         TilesCanvas.SizeChanged += (_, _) => DrawTiles();
 
         StoreButton.PointerPressed    += (_, _) => ActivateTopBarItem(0);
-        SettingsButton.PointerPressed += (_, _) => ActivateTopBarItem(1);
-        MenuButton.PointerPressed     += (_, _) => ActivateTopBarItem(2);
+        LibraryButton.PointerPressed  += (_, _) => ActivateTopBarItem(1);
+        SettingsButton.PointerPressed += (_, _) => ActivateTopBarItem(2);
+        MenuButton.PointerPressed     += (_, _) => ActivateTopBarItem(3);
 
         CloseAppButton.PointerPressed  += (_, _) => Close();
         MenuDimBackground.PointerPressed += (_, _) => CloseMenu();

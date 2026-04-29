@@ -111,6 +111,21 @@
                                        VerticalAlignment="Center"/>
                         </Border>
 
+                        <!-- Library button -->
+                        <Border x:Name="LibraryButton"
+                                Background="{DynamicResource AccentButtonBackgroundBrush}"
+                                BorderBrush="{DynamicResource AccentButtonBorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="6"
+                                Padding="14,6"
+                                Cursor="Hand">
+                            <TextBlock Text="LIBRARY"
+                                       FontSize="12"
+                                       FontWeight="Bold"
+                                       Foreground="{DynamicResource AccentBrush}"
+                                       VerticalAlignment="Center"/>
+                        </Border>
+
                         <!-- Settings button -->
                         <Border x:Name="SettingsButton"
                                 Background="{DynamicResource AccentButtonBackgroundBrush}"
@@ -217,7 +232,60 @@
             </Border>
         </Grid>
 
-        <!-- Layer 6: Settings overlay — must be last so it renders on top of everything -->
+        <!-- Layer 6: Library overlay -->
+        <Grid x:Name="LibraryOverlay" IsVisible="False">
+            <Border Background="{DynamicResource OverlayBackgroundBrush}"/>
+            <Border Background="{DynamicResource PanelBackgroundBrush}"
+                    BorderBrush="{DynamicResource AccentShopBorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="16"
+                    Width="700"
+                    Height="540"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center">
+                <Grid RowDefinitions="64,1,*,1,46">
+
+                    <!-- Title bar -->
+                    <StackPanel Grid.Row="0"
+                                Orientation="Horizontal"
+                                Spacing="12"
+                                VerticalAlignment="Center"
+                                Margin="28,0">
+                        <TextBlock Text="STEAM LIBRARY"
+                                   FontSize="16"
+                                   FontWeight="Bold"
+                                   Foreground="{DynamicResource AccentBrush}"
+                                   VerticalAlignment="Center"/>
+                        <TextBlock x:Name="LibrarySubtitle"
+                                   FontSize="12"
+                                   Foreground="White"
+                                   Opacity="0.4"
+                                   VerticalAlignment="Center"/>
+                    </StackPanel>
+
+                    <Rectangle Grid.Row="1" Fill="{DynamicResource AccentDividerBrush}"/>
+
+                    <!-- Game list -->
+                    <ScrollViewer x:Name="LibraryScrollViewer" Grid.Row="2">
+                        <StackPanel x:Name="LibraryContent" Margin="24,20,24,8"/>
+                    </ScrollViewer>
+
+                    <Rectangle Grid.Row="3" Fill="{DynamicResource AccentDividerBrush}"/>
+
+                    <!-- Footer hint -->
+                    <TextBlock x:Name="LibraryFooterHint"
+                               Grid.Row="4"
+                               Text="↑ ↓  navigate        ENTER  install        ESC  close"
+                               FontSize="11"
+                               Foreground="White"
+                               Opacity="0.25"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"/>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- Layer 8: Settings overlay — must be last so it renders on top of everything -->
         <Grid x:Name="SettingsOverlay" IsVisible="False">
             <Border Background="{DynamicResource OverlayBackgroundBrush}"/>
             <Border Background="{DynamicResource PanelBackgroundBrush}"
@@ -247,7 +315,7 @@
             </Border>
         </Grid>
 
-        <!-- Layer 7: Right sidebar menu -->
+        <!-- Layer 9: Right sidebar menu -->
         <Grid x:Name="MenuOverlay" IsVisible="False">
 
             <!-- Dim background — clicking it closes the menu -->

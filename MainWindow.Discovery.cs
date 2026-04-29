@@ -34,7 +34,25 @@ public partial class MainWindow
         ("Fall Guys",         "1097150", Color.FromRgb(180,  80, 200)),
     ];
 
-    static readonly LaunchItem[] Items = BuildItems();
+    static readonly (string Name, string Icon, string Desc, string? Native, string? Flatpak, Color Color, bool AlwaysPresent)[] KnownApps =
+    [
+        ("Terminal", ">",  "Command line",          null,              null,                          Color.FromRgb( 30,  30,  30), true),
+        ("Spotify",  "S",  "Music streaming",       "spotify",         "com.spotify.Client",          Color.FromRgb( 29, 185,  84), false),
+        ("Discord",  "@",  "Voice and chat",        "discord",         "com.discordapp.Discord",      Color.FromRgb( 88, 101, 242), false),
+        ("Vesktop",  "V",  "Discord client",        "vesktop",         "dev.vencord.Vesktop",         Color.FromRgb( 88, 101, 242), false),
+        ("Firefox",  "FF", "Web browser",           "firefox",         "org.mozilla.firefox",         Color.FromRgb(255,  80,   0), false),
+        ("Brave",    "B",  "Web browser",           "brave",           "com.brave.Browser",           Color.FromRgb(251, 112,   0), false),
+        ("Chrome",   "G",  "Web browser",           "google-chrome",   "com.google.Chrome",           Color.FromRgb( 66, 133, 244), false),
+        ("OBS",      "●",  "Streaming & recording", "obs",             "com.obsproject.Studio",       Color.FromRgb( 50,  50,  50), false),
+        ("VLC",      "▶",  "Media player",          "vlc",             "org.videolan.VLC",            Color.FromRgb(255, 165,   0), false),
+        ("Lutris",   "L",  "Game manager",          "lutris",          "net.lutris.Lutris",           Color.FromRgb(255, 230, 100), false),
+        ("Heroic",   "H",  "Epic & GOG games",      "heroic",          "com.heroicgameslauncher.hgl", Color.FromRgb(196,  62,  52), false),
+        ("Bottles",  "B",  "Run Windows apps",      "bottles",         "com.usebottles.bottles",      Color.FromRgb(240,  70,  70), false),
+        ("Telegram", "✈",  "Messaging",             "telegram-desktop","org.telegram.desktop",        Color.FromRgb( 42, 174, 245), false),
+    ];
+
+    static readonly LaunchItem[] DetectedGames = DiscoverSteamGames().ToArray();
+    static readonly LaunchItem[] DetectedApps  = DetectApps();
 
     static readonly string WallpaperDir =
         IOPath.Combine(AppDomain.CurrentDomain.BaseDirectory, "wallpapers");
@@ -84,31 +102,27 @@ public partial class MainWindow
         return shops;
     }
 
-    static LaunchItem[] BuildItems()
+    static bool IsAppInstalled(string? native, string? flatpak)
     {
-        var items = new List<LaunchItem>();
-        items.AddRange(DiscoverSteamGames());
-        items.Add(new("Terminal",    ">",  "Command line",          ResolveTerminal(),                                   Color.FromRgb( 30,  30,  30)));
-        items.Add(new("Spotify",     "S",  "Music streaming",       ResolveApp("spotify",     "com.spotify.Client"),     Color.FromRgb( 29, 185,  84)));
-        items.Add(new("Discord",     "@",  "Voice and chat",        ResolveApp("discord",     "com.discordapp.Discord"), Color.FromRgb( 88, 101, 242)));
-        items.Add(new("Firefox",     "FF", "Web browser",           ResolveApp("firefox",     "org.mozilla.firefox"),    Color.FromRgb(255,  80,   0)));
-        items.Add(new("Chrome",      "G",  "Web browser",           ResolveApp("google-chrome","com.google.Chrome"),     Color.FromRgb( 66, 133, 244)));
-        items.Add(new("VSCode",      "</>","Code editor",           ResolveApp("code",        "com.visualstudio.code"),  Color.FromRgb( 0,  122, 204)));
-        items.Add(new("Files",       "F",  "File manager",          ResolveApp("nautilus",    "org.gnome.Nautilus"),     Color.FromRgb( 53, 132, 228)));
-        items.Add(new("Steam",       "ST", "Game platform",         ResolveApp("steam",       "com.valvesoftware.Steam"),Color.FromRgb( 23,  46,  73)));
-        items.Add(new("OBS",         "●",  "Streaming & recording", ResolveApp("obs",         "com.obsproject.Studio"),  Color.FromRgb( 50,  50,  50)));
-        items.Add(new("VLC",         "▶",  "Media player",          ResolveApp("vlc",         "org.videolan.VLC"),       Color.FromRgb(255, 165,   0)));
-        items.Add(new("GIMP",        "G",  "Image editor",          ResolveApp("gimp",        "org.gimp.GIMP"),          Color.FromRgb( 93, 141,  52)));
-        items.Add(new("Blender",     "B",  "3D creation suite",     ResolveApp("blender",     "org.blender.Blender"),    Color.FromRgb(234, 126,   0)));
-        items.Add(new("Lutris",      "L",  "Game manager",          ResolveApp("lutris",      "net.lutris.Lutris"),      Color.FromRgb(255, 230, 100)));
-        items.Add(new("Bottles",     "B",  "Run Windows apps",      ResolveApp("bottles",     "com.usebottles.bottles"), Color.FromRgb(240,  70,  70)));
-        items.Add(new("Vesktop",     "V",  "Discord client",        ResolveApp("vesktop",     "dev.vencord.Vesktop"),    Color.FromRgb( 88, 101, 242)));
-        items.Add(new("Telegram",    "✈",  "Messaging",             ResolveApp("telegram-desktop","org.telegram.desktop"),Color.FromRgb( 42, 174, 245)));
-        items.Add(new("ProtonMail",  "P",  "Encrypted email",       "xdg-open https://mail.proton.me",                  Color.FromRgb(109,  74, 255)));
-        items.Add(new("YouTube",     "▶",  "Video streaming",       "xdg-open https://youtube.com",                     Color.FromRgb(255,   0,   0)));
-        items.Add(new("Twitch",      "T",  "Live streaming",        "xdg-open https://twitch.tv",                       Color.FromRgb(145,  70, 255)));
-        items.Add(new("GitHub",      "GH", "Code hosting",          "xdg-open https://github.com",                      Color.FromRgb( 36,  41,  46)));
-        return items.ToArray();
+        if (native != null && FindBinary(native) != null) return true;
+        if (flatpak == null || !IOFile.Exists("/usr/bin/flatpak")) return false;
+
+        string home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+        return IODirectory.Exists(IOPath.Combine(home, ".var", "app", flatpak))
+            || IODirectory.Exists(IOPath.Combine("/var/lib/flatpak/app", flatpak))
+            || IODirectory.Exists(IOPath.Combine(home, ".local/share/flatpak/app", flatpak));
+    }
+
+    static LaunchItem[] DetectApps()
+    {
+        var apps = new List<LaunchItem>();
+        foreach (var (name, icon, desc, native, flatpak, color, always) in KnownApps)
+        {
+            if (!always && !IsAppInstalled(native, flatpak)) continue;
+            string cmd = name == "Terminal" ? ResolveTerminal() : ResolveApp(native ?? "", flatpak ?? "");
+            apps.Add(new LaunchItem(name, icon, desc, cmd, color));
+        }
+        return apps.ToArray();
     }
 
     static string? FindBinary(string cmd)

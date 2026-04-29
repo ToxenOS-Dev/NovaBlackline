@@ -17,4 +17,4 @@ record ShopEntry(string Name, string Command, string Description);
 record SteamAppManifest(string AppId, string Name, string? Type, string? InstallDir);
 record ThemeProfile(Color WindowBackground, Color OverlayBackground, Color PanelBackground, byte DimTop, byte DimMiddle, byte DimBottom);
 
-enum Layer { Tiles, TopBar, Settings, Shop, Menu }
+enum Layer { Tiles, TopBar, Settings, Shop, Menu, Library }

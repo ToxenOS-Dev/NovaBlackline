@@ -44,6 +44,7 @@ public partial class MainWindow
 
     void UpdateBackground()
     {
+        if (Items.Length == 0) return;
         var bmp = GetWallpaper(_current);
         WallpaperImage.Source = bmp;
         UpdateSecondaryBackground();
@@ -84,6 +85,7 @@ public partial class MainWindow
 
     void UpdateInfo()
     {
+        if (Items.Length == 0) return;
         ItemNameText.Text = Items[_current].Name.ToUpper();
         ItemDescText.Text = Items[_current].Description;
     }
