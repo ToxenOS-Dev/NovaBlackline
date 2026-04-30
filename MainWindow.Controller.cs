@@ -153,7 +153,7 @@ public partial class MainWindow
     {
         if (_gameSessionActive) return;
         if (_layer == Layer.Menu)     { if (_menuIndex > 0) { _menuIndex--; DrawMenuItems(); } return; }
-        if (_layer == Layer.Library)  { if (_librarySelectedIndex > 0) { _librarySelectedIndex--; DrawLibraryContent(); ScrollLibraryToSelected(); } return; }
+        if (_layer == Layer.Library)  { if (_librarySelectedIndex > 0) { _librarySelectedIndex--; RefreshAndScroll(); } return; }
         if (_layer == Layer.Shop)
         {
             if (_shopInContent) MoveShopContentUp();
@@ -167,7 +167,7 @@ public partial class MainWindow
     {
         if (_gameSessionActive) return;
         if (_layer == Layer.Menu)     { if (_menuIndex < MenuItems.Length - 1) { _menuIndex++; DrawMenuItems(); } return; }
-        if (_layer == Layer.Library)  { if (_librarySelectedIndex < _libraryGames.Count - 1) { _librarySelectedIndex++; DrawLibraryContent(); ScrollLibraryToSelected(); } return; }
+        if (_layer == Layer.Library)  { if (_librarySelectedIndex < _libraryGames.Count - 1) { _librarySelectedIndex++; RefreshAndScroll(); } return; }
         if (_layer == Layer.Shop)
         {
             if (_shopInContent) MoveShopContentDown();
@@ -182,7 +182,7 @@ public partial class MainWindow
     {
         if (_gameSessionActive) return;
         if (_animating) { SkipAnimation(); return; }
-        if (_layer == Layer.Library)  { if (_libraryGames.Count > 0) InstallSteamGame(_libraryGames[_librarySelectedIndex].AppId); return; }
+        if (_layer == Layer.Library)  { if (_libraryGames.Count > 0) { var g = _libraryGames[_librarySelectedIndex]; ActivateLibraryGame(g.AppId, g.Installed); } return; }
         if (_layer == Layer.Shop)
         {
             if (_shopInContent) LaunchFeaturedGame(_shopGameIndex);

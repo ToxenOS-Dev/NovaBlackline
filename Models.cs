@@ -15,6 +15,7 @@ record LaunchItem(
 record SettingRow(string Category, string Label, string[] Options, int Default, Action<int> Apply);
 record ShopEntry(string Name, string Command, string Description);
 record SteamAppManifest(string AppId, string Name, string? Type, string? InstallDir);
+record LibraryEntry(string AppId, string Name, bool Installed);
 record ThemeProfile(Color WindowBackground, Color OverlayBackground, Color PanelBackground, byte DimTop, byte DimMiddle, byte DimBottom);
 
 enum Layer { Tiles, TopBar, Settings, Shop, Menu, Library }
